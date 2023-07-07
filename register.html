@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav>
+            <ul>
+              <li><a href="/login">Login</a></li>
+              <li><a href="/register">Register</a></li>
+              <li><a href="/tasks">Tasks</a></li>
+              <li><a href="/about">About</a></li>
+            </ul>
+          </nav>
+        <h2>Register</h2>
+        <form action="/register" method="POST">
+            <div class="error-message"></div>
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" required>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password1" required>
+            <label for="password">Confirm password</label>
+            <input type="password" id="password" name="password2" required>
+            <input type="submit" value="Login">
+            <a href="/register">Click here to log-in instead</a>
+        </form>
+    </div>
+</body>
+
+</html>
