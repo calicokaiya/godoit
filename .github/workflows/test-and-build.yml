@@ -16,6 +16,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          go mod init godoit
           go get .
           go get github.com/gorilla/securecookie@v1.1.1
           go get github.com/gorilla/sessions@1.2.1
