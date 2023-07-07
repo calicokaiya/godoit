@@ -18,9 +18,9 @@ jobs:
         run: |
           go get .
           go get github.com/gorilla/securecookie@v1.1.1
-          go get github.com/gorilla/sessions
+          go get github.com/gorilla/sessions@v1.2.1
           go get github.com/lib/pq@v1.10.9
-          go get golang.org/x/crypto@0.11.0
+          go get golang.org/x/crypto@v0.11.0
 
       - name: Build
         run: go build -v ./...
