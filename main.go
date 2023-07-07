@@ -231,5 +231,5 @@ func main() {
 		crudRead(w, r, db)
 	})
 	http.HandleFunc("/about", about)
-    log.Fatal(http.ListenAndServe(":80", nil))
+    log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), nil))
 }
