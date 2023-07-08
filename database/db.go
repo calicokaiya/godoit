@@ -4,22 +4,30 @@ import (
 	"fmt"
 	"database/sql"
 	_ "github.com/lib/pq"
+	"os"
 )
 
-const (
-	host = "localhost"
-	user = "godoit"
-	port = 5432
-	password =  "d01tn0w"
-	dbname = "godoit"
-)
+type connection struct {
+	host string
+	user string 
+	port string 
+	password string 
+	dbname string 
+}
 
 
 // Connects to the database
 func Connect() *sql.DB {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+	var conn connection
+	conn.host = os.Getenv("DB_HOST")
+	conn.user = os.Getenv("DB_USER")
+	conn.port = os.Getenv("DB_PORT")
+	conn.password = os.Getenv("DB_PW")
+	conn.dbname = os.Getenv("DB_NAME")
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 	  "password=%s dbname=%s sslmode=disable",
-	  host, port, user, password, dbname)
+	  conn.host, conn.port, conn.user, conn.password, conn.dbname)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
