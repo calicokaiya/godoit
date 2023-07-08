@@ -10,12 +10,21 @@
     <div class="container">
         <nav>
             <ul>
-              <li><a href="/login">Login</a></li>
-              <li><a href="/register">Register</a></li>
-              <li><a href="/tasks">Tasks</a></li>
-              <li><a href="/about">About</a></li>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register">Register</a></li>
+                <li><a href="/logout">Logout</a></li>
+                <li><a href="/tasks">Tasks</a></li>
+                <li><a href="/about">About</a></li>
             </ul>
-          </nav>
+        </nav>
+        <b>
+            This is only a Godoit demonstration. <br>
+            Please do not use your personal email
+            or password on this service!<br>
+            Database may be reset at any moment.
+            If you would like to install this on your servers, check out
+            <a href="https://github.com/calicokaiya/godoit">the github repo</a>.
+        </b>
         <h2>Register</h2>
         <form action="/register" method="POST">
             <div class="error-message"></div>
@@ -25,8 +34,8 @@
             <input type="password" id="password" name="password1" required>
             <label for="password">Confirm password</label>
             <input type="password" id="password" name="password2" required>
-            <input type="submit" value="Login">
-            <a href="/register">Click here to log-in instead</a>
+            <input type="submit" value="Register">
+            <a href="/login">Click here to log-in instead</a>
         </form>
     </div>
 </body>

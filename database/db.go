@@ -18,21 +18,29 @@ type connection struct {
 
 // Connects to the database
 func Connect() *sql.DB {
-	var conn connection
-	conn.host = os.Getenv("DB_HOST")
-	conn.user = os.Getenv("DB_USER")
-	conn.port = os.Getenv("DB_PORT")
-	conn.password = os.Getenv("DB_PW")
-	conn.dbname = os.Getenv("DB_NAME")
+	var psqlInfo string
+	// Tries connecting to render.com db
+	if os.Getenv("RENDER_POSTGRES_URL") != "" {
+		psqlInfo = os.Getenv("RENDER_POSTGRES_URL")
+	} else { // or to local postgresql db
+		fmt.Println("Connecting to local db")
+		var conn connection
+		conn.host = os.Getenv("DB_HOST")
+		conn.user = os.Getenv("DB_USER")
+		conn.port = os.Getenv("DB_PORT")
+		conn.password = os.Getenv("DB_PW")
+		conn.dbname = os.Getenv("DB_NAME")
 
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-	  "password=%s dbname=%s sslmode=disable",
-	  conn.host, conn.port, conn.user, conn.password, conn.dbname)
+		psqlInfo = fmt.Sprintf("host=%s port=%s user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		conn.host, conn.port, conn.user, conn.password, conn.dbname)
+
+	}
+
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
 	}
-	//defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
@@ -51,6 +59,7 @@ func SelectManyQuery(db *sql.DB, userID int) []TaskQuery {
 	rows, err := db.Query("SELECT * FROM tasks WHERE user_id = $1;", userID)
 	if err != nil {
 	  // handle this error better than this
+	  fmt.Println("if error appears here...")
 	  panic(err)
 	}
 	defer rows.Close()
@@ -62,6 +71,7 @@ func SelectManyQuery(db *sql.DB, userID int) []TaskQuery {
 
 		if err != nil {
 			// handle this error
+			fmt.Println("or if it appears here...")
 			panic(err)
 		}
 		results = append(results, row)
@@ -78,6 +88,7 @@ func SelectManyQuery(db *sql.DB, userID int) []TaskQuery {
 func SelectSingleQuery(db *sql.DB, id int, userId int) (TaskQuery, error) {
 	var row TaskQuery
 	query := `SELECT * FROM tasks WHERE id = $1 AND user_id = $2;`
+	fmt.Println("DEBUGGING QUERY: ", query, id, userId)
 	qr := db.QueryRow(query, id, userId)
 	err := qr.Scan(&row.Id,	&row.Title,	&row.Description, &row.DueDate,	&row.User_id)
 	if err != nil {
@@ -127,6 +138,9 @@ func InsertIntoTasks(db *sql.DB, data TaskQuery, userId int) error {
 	query := `INSERT INTO tasks
 	(title, description, dueDate, user_id)
 	VALUES ($1, $2, $3, $4);`
+	if data.Title == "" {
+		data.Title = "Unnamed task"
+	}
 	_, err := db.Exec(query, 
 		data.Title,
 		data.Description,

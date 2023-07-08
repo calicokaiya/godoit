@@ -14,6 +14,7 @@ $(document).ready(function () {
             success: function (response) {
                 // Handle the successful response
                 console.log(response);
+                location.reload();
             },
             error: function (xhr, status, error) {
                 // Handle the error
@@ -21,26 +22,49 @@ $(document).ready(function () {
             }
         });
     });
-    $('#deleteTaskForm').submit(function (event) {
-        event.preventDefault(); // Prevent the default form submission
+    // Handle the click event on the Update button
+    $('.updateButton').click(function () {
+        var taskId = $(this).data('task-id'); // Get the task ID from the button's data attribute
 
-        // Serialize the form data
+        // Populate the modal fields with existing data
+        var $row = $('#' + taskId);
+        var title = $row.find('td:eq(0)').text();
+        var description = $row.find('td:eq(1)').text();
+        var dueDate = $row.find('td:eq(2)').text();
+
+        $('#recipient-name').val(title);
+        $('#message-text').val(description);
+        $('#dueDate').val(dueDate);
+        $('#taskId').val(taskId);
+
+        // Show the modal
+        $('#updateModal').modal('show');
+    });
+
+    // Handle the form submission
+    $('#updateTaskForm').submit(function (event) {
+        event.preventDefault();
+
         var formData = $(this).serialize();
+        //var taskId = $('#taskId').val();
+        console.log(formData)
 
-        // Send an AJAX request
+        // Send an AJAX request to update the task
         $.ajax({
-            url: '/tasks/create',
+            url: '/tasks/update', // Adjust the URL to match your backend endpoint
             type: 'POST',
             data: formData,
             success: function (response) {
-                // Handle the successful response
                 console.log(response);
+                location.reload(); // Reload the page or update the table as needed
             },
             error: function (xhr, status, error) {
-                // Handle the error
                 console.error(error);
             }
         });
+
+        // Hide the modal
+        $('#updateModal').modal('hide');
     });
     $('.deleteButton').click(function () {
         var taskId = $(this).data('task-id');
@@ -55,52 +79,12 @@ $(document).ready(function () {
             success: function (response) {
                 // Handle the successful response
                 console.log(response);
-
-                // Remove the deleted row from the table
-                //$('#' + taskId).remove();
+                location.reload();
             },
             error: function (xhr, status, error) {
                 // Handle the error
                 console.error(error);
             }
-        });
-    });
-
-    // Add event listener to editable fields
-    $('table').on('keyup focusout', '.editable', function (event) {
-        var taskId = $(this).closest('tr').attr('id');
-        var field = $(this).data('field');
-        var currentValue = $(this).text();
-
-        if (event.type === 'keyup' && event.keyCode !== 13) {
-            return; // Skip if it's not the Enter key
-        }
-
-        var newValue = $(this).val();
-
-        // Send an AJAX request to update the task
-        $.ajax({
-            url: '/tasks/update',
-            type: 'POST',
-            data: {
-                taskId: taskId,
-                field: field,
-                value: newValue
-            },
-            success: function (response) {
-                // Handle the successful response
-                console.log(response);
-
-                // Update the field with the new value
-                $(this).text(newValue);
-            }.bind(this),
-            error: function (xhr, status, error) {
-                // Handle the error
-                console.error(error);
-
-                // Revert the field back to the original value
-                $(this).text(currentValue);
-            }.bind(this)
         });
     });
 });

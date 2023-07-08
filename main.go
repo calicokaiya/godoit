@@ -86,7 +86,7 @@ func crudUpdate(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func crudRead(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if !utils.CheckLogin(r, store) {
-		fmt.Println("Useri s not logged in!")
+		fmt.Println("User is not logged in!")
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
@@ -131,6 +131,8 @@ func register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		formData.Password2 = formData.Password1
 		// Must check for errors
 		database.InsertIntoUsers(db, formData)
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
 	}
 
 	// Loads the HTML template file
@@ -140,8 +142,6 @@ func register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	tmpl.Execute(w, nil)
-	http.Redirect(w, r, "/login", http.StatusFound)
-	return
 }
 
 func about(w http.ResponseWriter, r *http.Request) {
@@ -159,7 +159,6 @@ func login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Get POST form values
 	loginData := utils.ExtractLoginFormData(r)
 	if loginData.Email != "" || loginData.Password != "" {
-		fmt.Println("Data:", loginData.Email, loginData.Password)
 		queryResults, err := database.SelectLoginQuery(db, loginData, 1)
 		if err != nil {
 			fmt.Println(err)
@@ -190,10 +189,16 @@ func login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session-name")
+	session, _ := store.Get(r, "user-session")
 	session.Options.MaxAge = -1 // Expire the session immediately
 	session.Save(r, w)
-	fmt.Println("User ID after logout:", session.Values["userID"])
+	http.Redirect(w, r, "/login", http.StatusFound)
+	return
+}
+
+func root(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/login", http.StatusFound)
+	return
 }
 
 // Creates session data
@@ -204,13 +209,14 @@ func init() {
 }
 
 func main() {
+	var port string
 	db := database.Connect()
 	defer db.Close()
 
 	// Serve static files (including styles.css)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
+	http.HandleFunc("/", root)
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		register(w, r, db)
 	})
@@ -231,5 +237,12 @@ func main() {
 		crudRead(w, r, db)
 	})
 	http.HandleFunc("/about", about)
-    log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), nil))
+	// If PORT environment variable is set, listen on that
+	// Else, listen on 8080
+	if os.Getenv("PORT") != "" {
+		port = os.Getenv("PORT")
+	} else {
+		port = "8080"
+	}
+    log.Fatal(http.ListenAndServe(":" + port, nil))
 }
